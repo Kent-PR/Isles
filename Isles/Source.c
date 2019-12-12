@@ -16,18 +16,32 @@ void output(void);
 FILE* opening(void);
 //
 
-//tmp
+//tmp func
 void create_data(FILE* fin);
 void rus(void);
+int dots_count(void);
 //
 
 int main(void)
 {
 	rus();
 	input();
-
+	printf("%d\n", dots_count());
 
 	return 0;
+}
+
+int dots_count(void)
+{
+	int sum = 0;
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			sum += data_h[i][j];
+		}
+	}
+	return sum;
 }
 
 void rus(void)
