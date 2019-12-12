@@ -7,7 +7,11 @@ int data_h[8][4];
 int data_v[8][4];
 int N;
 
+//in out
 void input(void);
+void output(void);
+//
+
 
 int main(void)
 {
@@ -45,5 +49,17 @@ void input(void)
 			i++;
 			if (!tmp) break;
 		}
+	}
+}
+
+void output(void)
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			printf("%c", matrix[i][j]);
+		}
+		printf("\n");
 	}
 }
