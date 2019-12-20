@@ -1,15 +1,16 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
+#include <stdbool.h>
 
-char matrix[8][8];
+char main_field[8][8];
 int data_h[8][5];
 int data_v[8][5];
 int N;
 
 //in out
 void input(void);
-void output(void);
+void print(void);
 //
 
 //file
@@ -30,11 +31,104 @@ int main(void)
 	return 0;
 }
 
-void rus(void)
+void clean_hash(void)
 {
-	system("chcp 1251");
-	system("cls");
+	for (int y = 0; y < N; y++)
+	{
+		for (int x = 0; x < N; x++)
+		{
+			if (main_field[y][x] == '#')
+				main_field[y][x] = ' ';
+		}
+	}
 }
+void check(void)
+{
+	clean_hash();
+	for (int y = 0; y < N; y++)
+	{
+		for (int x = 0; x < N; x++)
+		{
+			ban_cross_check(x, y);
+		}
+	}
+}
+void ban_cross_check(int y, int x)
+{
+	int column = 0;
+	int row = 0;
+	for (int i = 0; i < N; i++)
+	{
+		if (main_field[i][x] == '*')
+			column++;
+		if (main_field[y][i] == '*')
+			row++;
+	}
+
+	int vert = 0;
+	int hor = 0;
+	for (int i = 0; i < 5; i++)
+	{
+		vert += data_h[y][i];
+		hor += data_v[x][i];
+	}
+
+	if (vert == column)
+		ban_column(x);
+	if (hor == row)
+		ban_row(y);
+
+}
+void ban_row(int y)
+{
+	for (int i = 0; i < N; i++)
+	{
+		if (main_field[y][i] == ' ')
+			main_field[y][i] = '#';
+	}
+}
+void ban_column(int x)
+{
+	for (int i = 0; i < N; i++)
+	{
+		if (main_field[i][x] == ' ')
+			main_field[i][x] = '#';
+	}
+}
+
+
+bool check_sum()
+{
+	for (int i = 0; i < N; i++)
+	{
+		if (!sum(i))
+			return sum(i);
+	}
+}
+bool sum(int index)
+{
+	int column = 0;
+	int row = 0;
+	for (int i = 0; i < N; i++)
+	{
+		if (main_field[i][index] == '*')
+			column++;
+		if (main_field[index][i] == '*')
+			row++;
+	}
+
+	int vert = 0;
+	int hor = 0;
+	for (int i = 0; i < 5; i++)
+	{
+		vert += data_h[index][i];
+		hor += data_v[index][i];
+	}
+
+	if (vert != column) return false;
+	if (hor != row)return false;
+}
+
 
 void create_data(FILE* fin)
 {
@@ -65,7 +159,6 @@ void create_data(FILE* fin)
 		counter++;
 	}
 }
-
 FILE* opening(void)
 {
 	char name[100];//отводим массив под имя файла.
@@ -82,7 +175,6 @@ FILE* opening(void)
 	}
 	return file_in;//возвращаем указатель на поток.
 }
-
 void input(void)
 {
 	create_data(opening());
@@ -116,14 +208,20 @@ void input(void)
 	}*/
 }
 
-void output(void)
+void print(void)
 {
 	for (int i = 0; i < N; i++)
 	{
 		for (int j = 0; j < N; j++)
 		{
-			printf("%c", matrix[i][j]);
+			printf("%c", main_field[i][j]);
 		}
 		printf("\n");
 	}
+}
+
+void rus(void)
+{
+	system("chcp 1251");
+	system("cls");
 }
