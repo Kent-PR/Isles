@@ -8,6 +8,7 @@
 char seamap[8][8];
 int rows_data[8][5];
 int columns_data[8][5];
+int islands_left;
 
 int Y[64] = { -1 }; int X[64] = { -1 };
 int last_error_coords[2];
@@ -37,7 +38,9 @@ int islands_count(void);
 void all_maps_logiks(void);
 bool map_build_logics(void);
 void place(int y, int x, int num);
+bool error_check(int y, int x);
 bool free_place(int num);
+int get_num(int y, int x);
 bool free_islands(int islands);
 int islands_count(void);
 
@@ -47,6 +50,7 @@ void full_column(void);
 void ban_row(int num);
 void ban_column(int num);
 void clear_hash(void);
+void local_hash(void);
 
 void settings(int num);
 void set_ban(int num);
@@ -73,6 +77,7 @@ void identification_of_complete(void)
 	clear_hash();
 	full_row();
 	full_column();
+	//local_hash();
 }
 void full_row(void)
 {
@@ -146,6 +151,44 @@ void clear_hash(void)
 		}
 	}
 }
+void local_hash(void)
+{
+	for (int y = 0; y < N; y++)
+	{
+		int block;
+		for (int i = 0; i < 5; i++)
+		{
+			block = rows_data[y][i];
+			if (!block) break;
+
+			for (int j = 0; j < N; j++)
+			{
+				if ((seamap[y][j] == '*') && ((block + j) < N))
+				{
+					seamap[y][j + block] = '#';
+				}
+			}
+		}
+	}
+
+	for (int x = 0; x < N; x++)
+	{
+		int block;
+		for (int i = 0; i < 5; i++)
+		{
+			block = columns_data[x][i];
+			if (!block) break;
+			
+			for (int j = 0; j < N; j++)
+			{
+				if ((seamap[j][x] == '*') && ((j+block)<N))
+				{
+					seamap[j + block][x] = '#';
+				}
+			}
+		}
+	}
+}
 
 
 void delete_last(void)
@@ -172,6 +215,7 @@ void delete_last(void)
 			break;
 		}
 	}
+	islands_left++;
 	identification_of_complete();
 }
 bool exist_last()
@@ -203,7 +247,7 @@ void all_maps_logiks(void)
 }
 bool map_build_logics(void)
 {
-	int islands_left = islands_count();
+	islands_left = islands_count();
 	bool unfinished_map_flag = free_islands(islands_left);
 	while (1) 
 	{
@@ -215,54 +259,75 @@ bool map_build_logics(void)
 		//
 		bool placed = free_place(islands_count() - islands_left);
 
-		if (placed)
-		{
-			islands_left--;
-		}
-		else
+		if(!placed)
 		{
 			if (exist_last())
 			{
 				delete_last();
-				islands_left++;
 			}
-			else return false;
+			else
+			{
+				return false;
+			}
 		}
 	}
 }
 void place(int y, int x,int num)
 {
+	islands_left--;
 	seamap[y][x] = '*';
 	X[num] = x;
 	Y[num] = y;
 }
 bool free_place(int num)
 {
-	/*int y_pos;
-	int x_pos;
-	if (!num)
-	{
-		y_pos = 0;
-		x_pos = 0;
-	}
-	else 
-	{
-		y_pos = last_error_coords[YC];
-		x_pos = last_error_coords[XC];
-	}*/
-
+	int error_tile_num = get_num(last_error_coords[YC], last_error_coords[XC]);
 	for (int y = last_error_coords[YC]; y < N; y++)
 	{
-		for (int x = last_error_coords[XC]; x < N; x++)
+		for (int x = 0; x < N; x++)
 		{
-			if ((seamap[y][x] != '#') && (seamap[y][x] != '*') && (seamap[y][x] != '@') && (seamap[y][x] != 'e'))
+			int current_tile_num = get_num(y, x);
+			if ((seamap[y][x] != '#') && (seamap[y][x] != '*') && (seamap[y][x] != '@') && (seamap[y][x] != 'e') && (current_tile_num >= error_tile_num))
 			{
 				place(y, x, num);
-				return true;
+				return error_check(y, x);
 			}
 		}
 	}
 	return false;
+}
+int get_num(int y, int x)
+{
+	int num = y * N + x;
+	return num;
+}
+bool error_check(int y, int x) 
+{
+	int isl_cnt = 0;
+	for (int i = 0; i < N; i++)
+	{
+		if (!rows_data[y][isl_cnt]) break;
+		if (seamap[y][i] == '*')
+		{
+			if (seamap[y][i + rows_data[y][isl_cnt]] == '*')
+				return false;
+			isl_cnt++;
+			i = i + rows_data[y][isl_cnt] - 1;
+		}
+	}
+	isl_cnt = 0;
+	for (int j = 0; j < N; j++)
+	{
+		if (!columns_data[x][isl_cnt]) break;
+		if (seamap[j][x] == '*')
+		{
+			if (seamap[j + columns_data[x][isl_cnt]][x] == '*')
+				return false;
+			isl_cnt++;
+			j = j + columns_data[x][isl_cnt] - 1;
+		}
+	}
+	return true;
 }
 bool free_islands(int islands)
 {
