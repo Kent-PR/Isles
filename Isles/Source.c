@@ -33,6 +33,7 @@ void check(void);
 void ban_cross_check(int y, int x);
 void ban_row(int y);
 void ban_column(int x);
+void opti(void);
 
 bool sum(int index);
 bool check_sum(void);
@@ -172,6 +173,7 @@ void check(void)
 			ban_cross_check(x, y);
 		}
 	}
+	opti();
 }
 void ban_cross_check(int y, int x)
 {
@@ -213,6 +215,33 @@ void ban_column(int x)
 	{
 		if (seamap[i][x] == ' ')
 			seamap[i][x] = '#';
+	}
+}
+void opti(void)
+{
+	for (int index = 0; index < N; index++)
+	{
+		int k = 0;
+		for (int j = 0; j < N; j++)
+		{
+			if ((seamap[index][j] == '*') && ((j + data_h[index][k]) < N))
+			{
+				seamap[index][j + data_h[index][k]]='#';
+				j += data_h[index][k];
+				k++;
+			}
+		}
+		int i = 0;
+		for (int j = 0; j < N; j++)
+		{
+			int adjacent_points = 0;
+			if ((seamap[j][index] == '*') && ((j + data_v[index][i]) < N))
+			{
+				seamap[j + data_v[index][i]][index] = '#';
+				j += data_v[index][i];
+				i++;
+			}
+		}
 	}
 }
 
